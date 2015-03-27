@@ -1,15 +1,15 @@
-// rwlock.cpp: Ö÷ÏîÄ¿ÎÄ¼ş¡£
+// rwlock.cpp: ä¸»é¡¹ç›®æ–‡ä»¶ã€‚
 
 #include "stdafx.h"
 
-//¶ÁÕßÓëĞ´ÕßÎÊÌâ¼Ì ¶ÁĞ´ËøSRWLock
+//è¯»è€…ä¸å†™è€…é—®é¢˜ç»§ è¯»å†™é”SRWLock
 #include <stdio.h>
 #include <process.h>
 #include <windows.h>
 #include "WRLock.h"
 #include <iostream>
 
-//ÉèÖÃ¿ØÖÆÌ¨Êä³öÑÕÉ«
+//è®¾ç½®æ§åˆ¶å°è¾“å‡ºé¢œè‰²
 inline BOOL SetConsoleColor(WORD wAttributes)
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -17,12 +17,12 @@ inline BOOL SetConsoleColor(WORD wAttributes)
 		return FALSE;
 	return SetConsoleTextAttribute(hConsole, wAttributes);
 }
-const int READER_NUM = 7;  //¶ÁÕß¸öÊı
-//¹Ø¼ü¶ÎºÍÊÂ¼ş
+const int READER_NUM = 7;  //è¯»è€…ä¸ªæ•°
+//å…³é”®æ®µå’Œäº‹ä»¶
 CRITICAL_SECTION g_cs;
 HANDLE  g_srwLock;
 
-//¶ÁÕßÏß³ÌÊä³öº¯Êı(±ä²Îº¯ÊıµÄÊµÏÖ)
+//è¯»è€…çº¿ç¨‹è¾“å‡ºå‡½æ•°(å˜å‚å‡½æ•°çš„å®ç°)
 inline void ReaderPrintf(char *pszFormat, ...)
 {
 	va_list   pArgList;
@@ -32,20 +32,20 @@ inline void ReaderPrintf(char *pszFormat, ...)
 	LeaveCriticalSection(&g_cs);
 	va_end(pArgList);
 }
-//¶ÁÕßÏß³Ìº¯Êı
+//è¯»è€…çº¿ç¨‹å‡½æ•°
 unsigned int __stdcall ReaderThreadFun(PVOID pM)
 {
-	ReaderPrintf("     ±àºÅÎª%dµÄ¶ÁÕß½øÈëµÈ´ıÖĞ...\n", GetCurrentThreadId());
-	//¶ÁÕßÉêÇë¶ÁÈ¡ÎÄ¼ş
+	ReaderPrintf("     ç¼–å·ä¸º%dçš„è¯»è€…è¿›å…¥ç­‰å¾…ä¸­...\n", GetCurrentThreadId());
+	//è¯»è€…ç”³è¯·è¯»å–æ–‡ä»¶
 	CWRLock lock(g_srwLock);
-	//¶ÁÈ¡ÎÄ¼ş
-	ReaderPrintf("±àºÅÎª%dµÄ¶ÁÕß¿ªÊ¼¶ÁÈ¡ÎÄ¼ş...\n", GetCurrentThreadId());
+	//è¯»å–æ–‡ä»¶
+	ReaderPrintf("ç¼–å·ä¸º%dçš„è¯»è€…å¼€å§‹è¯»å–æ–‡ä»¶...\n", GetCurrentThreadId());
 	Sleep(3000+rand() % 2000);
-	ReaderPrintf(" ±àºÅÎª%dµÄ¶ÁÕß½áÊø¶ÁÈ¡ÎÄ¼ş\n", GetCurrentThreadId());
+	ReaderPrintf(" ç¼–å·ä¸º%dçš„è¯»è€…ç»“æŸè¯»å–æ–‡ä»¶\n", GetCurrentThreadId());
 	lock.Unlock();
 	return 0;
 }
-//Ğ´ÕßÏß³ÌÊä³öº¯Êı
+//å†™è€…çº¿ç¨‹è¾“å‡ºå‡½æ•°
 inline void WriterPrintf(char *pszFormat, ...)
 {
 	va_list   pArgList;
@@ -56,43 +56,43 @@ inline void WriterPrintf(char *pszFormat, ...)
 	SetConsoleColor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 	LeaveCriticalSection(&g_cs);
 }
-//Ğ´ÕßÏß³Ìº¯Êı
+//å†™è€…çº¿ç¨‹å‡½æ•°
 unsigned int __stdcall WriterThreadFun(PVOID pM)
 {
-	WriterPrintf("±àºÅÎª%dĞ´ÕßÏß³Ì½øÈëµÈ´ıÖĞ...\n", GetCurrentThreadId());
-	//Ğ´ÕßÉêÇëĞ´ÎÄ¼ş
+	WriterPrintf("ç¼–å·ä¸º%då†™è€…çº¿ç¨‹è¿›å…¥ç­‰å¾…ä¸­...\n", GetCurrentThreadId());
+	//å†™è€…ç”³è¯·å†™æ–‡ä»¶
 	CWRLock lock(g_srwLock, false);
-	//Ğ´ÎÄ¼ş
-	WriterPrintf("  ±àºÅÎª%dĞ´Õß¿ªÊ¼Ğ´ÎÄ¼ş.....\n", GetCurrentThreadId());
+	//å†™æ–‡ä»¶
+	WriterPrintf("  ç¼–å·ä¸º%då†™è€…å¼€å§‹å†™æ–‡ä»¶.....\n", GetCurrentThreadId());
 	Sleep(3000+ rand() % 3000);
-	WriterPrintf("  ±àºÅÎª%dĞ´Õß½áÊøĞ´ÎÄ¼ş\n", GetCurrentThreadId());
+	WriterPrintf("  ç¼–å·ä¸º%då†™è€…ç»“æŸå†™æ–‡ä»¶\n", GetCurrentThreadId());
 	lock.Unlock();
-	//±ê¼ÇĞ´Õß½áÊøĞ´ÎÄ¼ş
+	//æ ‡è®°å†™è€…ç»“æŸå†™æ–‡ä»¶
 	return 0;
 }
 int main()
 {
-	printf("  ¶ÁÕßĞ´ÕßÎÊÌâ ¶ÁĞ´ËøRWLock\n");
-	//³õÊ¼»¯¶ÁĞ´ËøºÍ¹Ø¼ü¶Î
+	printf("  è¯»è€…å†™è€…é—®é¢˜ è¯»å†™é”RWLock\n");
+	//åˆå§‹åŒ–è¯»å†™é”å’Œå…³é”®æ®µ
 	InitializeCriticalSection(&g_cs);
 	g_srwLock = GetWRLock();
 	HANDLE hThread[READER_NUM + 1];
 	int i;
-	//ÏÈÆô¶¯¶ş¸ö¶ÁÕßÏß³Ì
+	//å…ˆå¯åŠ¨äºŒä¸ªè¯»è€…çº¿ç¨‹
 	for (i = 0; i <= 1; i++)
 		hThread[i] = (HANDLE)_beginthreadex(NULL, 0, ReaderThreadFun, NULL, 0, NULL);
 	Sleep(1000);
-	//Æô¶¯Èı¸öĞ´ÕßÏß³Ì
+	//å¯åŠ¨ä¸‰ä¸ªå†™è€…çº¿ç¨‹
 	for(i = 2; i <= 4; i++ )
 		hThread[i] = (HANDLE)_beginthreadex(NULL, 0, WriterThreadFun, NULL, 0, NULL);
 	Sleep(1000);
-	//×îºóÆô¶¯ÆäËü¶ÁÕß½á³Ì
+	//æœ€åå¯åŠ¨å…¶å®ƒè¯»è€…ç»“ç¨‹
 	for ( ; i <= READER_NUM; i++)
 		hThread[i] = (HANDLE)_beginthreadex(NULL, 0, ReaderThreadFun, NULL, 0, NULL);
 	WaitForMultipleObjects(READER_NUM + 1, hThread, TRUE, INFINITE);
 	for (i = 0; i < READER_NUM + 1; i++)
 		CloseHandle(hThread[i]);
-	//Ïú»Ù¹Ø¼ü¶Î
+	//é”€æ¯å…³é”®æ®µ
 	DeleteCriticalSection(&g_cs);
 	DestroyWRLock(g_srwLock);
 	char c;

@@ -15,41 +15,41 @@ class CKSRWLock
 public:
 	void LockWrite()
 	{
-		// Ğ´µÈ´ıµÄ¼ÆÊı±äÁ¿
+		// å†™ç­‰å¾…çš„è®¡æ•°å˜é‡
 		assert(m_refWriteWaitCount >= 0);
 		InterlockedIncrement(&m_refWriteWaitCount);
-		// ÁÙ½çÇø
+		// ä¸´ç•ŒåŒº
 		EnterCriticalSection(&m_csWrite);
-		// ²»¿É¶Á
+		// ä¸å¯è¯»
 		ResetEvent(m_eventReadEnable);
-		// »¥³â
+		// äº’æ–¥
 		InterlockedExchangeAdd(&m_refCount, -m_clMAX_READ);
-		// µÈ´ıËùÓĞ¶ÁÍê³É
+		// ç­‰å¾…æ‰€æœ‰è¯»å®Œæˆ
 		while (m_refCount < 0)
 			SwitchToThread();
 	}
 	void UnlockWrite()
 	{
-		// »¥³â
+		// äº’æ–¥
 		LONG init = InterlockedExchangeAdd(&m_refCount, m_clMAX_READ);
 
-		// Ğ´µÈ´ıµÄ¼ÆÊı±äÁ¿
+		// å†™ç­‰å¾…çš„è®¡æ•°å˜é‡
 		LONG value = InterlockedDecrement(&m_refWriteWaitCount);
 		assert(value >= 0);
 
-		// ¿É¶Á
+		// å¯è¯»
 		SetEvent(m_eventReadEnable);
 		LeaveCriticalSection(&m_csWrite);
 	}
 
-	// ·µ»Ø²¢·¢¶ÁµÄÏß³ÌÊı
+	// è¿”å›å¹¶å‘è¯»çš„çº¿ç¨‹æ•°
 	LONG LockRead()
 	{
 		DWORD dwRes;
 		while (true)
 		{
 			if (0 == m_refWriteWaitCount)
-			{ // »¥³â
+			{ // äº’æ–¥
 				LONG iResult = InterlockedDecrement(&m_refCount);
 				if (iResult > 0)
 				{
@@ -59,15 +59,15 @@ public:
 				}
 				InterlockedIncrement(&m_refCount);
 			}
-			// ½øÈëÄÚºËµÈ´ı
+			// è¿›å…¥å†…æ ¸ç­‰å¾…
 			dwRes = WaitForSingleObject(m_eventReadEnable, INFINITE);
-			if (dwRes == WAIT_ABANDONED || dwRes == WAIT_FAILED)//Ê§°Ü
+			if (dwRes == WAIT_ABANDONED || dwRes == WAIT_FAILED)//å¤±è´¥
 				return 0;
 		}
 	}
 
 	void UnlockRead()
-	{ // »¥³â
+	{ // äº’æ–¥
 		InterlockedIncrement(&m_refCount);
 	}
 
@@ -91,7 +91,7 @@ public:
 	}
 
 protected:
-	// ×î´ó²»»á³¬¹ı m_clMAX_READ ¸ö²¢·¢¶Á
+	// æœ€å¤§ä¸ä¼šè¶…è¿‡ m_clMAX_READ ä¸ªå¹¶å‘è¯»
 	static const LONG	m_clMAX_READ = 1000000;
 	// m_refCount: using interlocked funtions to access
 	// 100000000		- free

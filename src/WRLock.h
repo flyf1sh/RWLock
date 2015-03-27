@@ -11,7 +11,7 @@ class CWRLock
 public:
 	CWRLock(
 		 _Inout_ HANDLE wrlock,
-		 _In_ bool bInitialLock=true);//³õÊ¼»¯Ê±Ëø×ÊÔ´£¬true£¬¶ÁËø£»flase£¬Ğ´Ëø
+		 _In_ bool bInitialLock=true);//åˆå§‹åŒ–æ—¶é”èµ„æºï¼Œtrueï¼Œè¯»é”ï¼›flaseï¼Œå†™é”
 	~CWRLock() throw();
 	void RLock();
 	void WLock();

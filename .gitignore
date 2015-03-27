@@ -20,3 +20,5 @@ Makefile
 *.swp
 tags
 *.DS_Store
+Debug
+Release
